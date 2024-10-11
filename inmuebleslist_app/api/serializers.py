@@ -1,15 +1,18 @@
 from rest_framework import serializers
-from inmuebleslist_app.models import Inmueble, Empresa
+from inmuebleslist_app.models import Edificacion, Empresa, Comentario
 
+class ComentarioSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Comentario
+        fields = "__all__"
 
-class InmuebleSerializer(serializers.ModelSerializer):
+class EdificacionSerializer(serializers.ModelSerializer):
+    comentarios = ComentarioSerializer(many = True, read_only=True)
     #campos antes del meta
-    longitud_direccion = serializers.SerializerMethodField()
-
     #campos que aparecen despues
     class Meta:
-        model = Inmueble
+        model = Edificacion
         #fields = "__all__"
         # fields = [
         #     'id',
@@ -35,8 +38,19 @@ class InmuebleSerializer(serializers.ModelSerializer):
          else:
              return data
          
-class EmpresaSerializer(serializers.ModelSerializer):
-    
+class EmpresaSerializer(serializers.HyperlinkedModelSerializer):
+    edificacion_list = EdificacionSerializer(many=True, read_only=True)
+    url = serializers.HyperlinkedIdentityField(view_name='empresa-detalle', lookup_field='id')
+
+#   edificacion_list = serializers.StringRelatedField(many=True, read_only=True) lo que devuelve el __str__
+#   edificacion_list = serializers.PrimaryKeyRelatedField(many=True, read_only=True) #para devilver la llave(id)
+    # edificacion_list = serializers.HyperlinkedRelatedField(
+        # many=True, 
+        # read_only=True,
+        # view_name='edificacion-detalle',
+        # lookup_field='id'
+    # )
+
     class Meta:
         model = Empresa
         fields = "__all__"
